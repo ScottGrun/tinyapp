@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //Generate Random URL string
 const generateRandomString = () => {
-  return  Math.random().toString(36).substr(6);
+  return Math.random().toString(36).substr(6);
 };
 
 console.log(generateRandomString());
@@ -38,10 +38,18 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  //Redirect user to the long url on short url click
+  res.redirect(urlDatabase[req.params.shortURL]);
+});
+
 app.post("/urls", (req, res) => {
+  //Update DB with submitted URL
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
-  console.log(urlDatabase)
+  const redirectLink = `/urls/${shortURL}`;
+  res.redirect(redirectLink);
+  console.log(urlDatabase);
   res.send("Ok");
 });
 
