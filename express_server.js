@@ -1,17 +1,19 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
+const morgan = require('morgan');
 const PORT = 8080;
-
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(morgan('dev'))
+
 
 //Generate Random URL string
 const generateRandomString = () => {
   return Math.random().toString(36).substr(6);
 };
 
-console.log(generateRandomString());
 const urlDatabase = {
   "9sm5xKs": "http://www.google.com",
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -44,6 +46,16 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL]);
 });
 
+//edit url
+app.post("/editurl/:id", (req, res) => {
+  //Update DB with submitted URL
+  let shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect('/urls')
+  res.send("Ok");
+});
+
+
 
 app.post("/urls", (req, res) => {
   //Update DB with submitted URL
@@ -55,6 +67,7 @@ app.post("/urls", (req, res) => {
   res.send("Ok");
 });
 
+
 //delete url
 app.post('/urls/:shortURL/delete', (req, res)=>{
   let shortURL = req.params.shortURL;
@@ -62,7 +75,11 @@ app.post('/urls/:shortURL/delete', (req, res)=>{
   console.log(urlDatabase)
   delete urlDatabase[shortURL];
   res.redirect('/urls')
+})
 
+//edit url
+app.post('/urls/:id', (req, res)=>{
+  res.redirect(`/urls/${req.params.id}`)
 })
 
 app.listen(PORT, () => {
