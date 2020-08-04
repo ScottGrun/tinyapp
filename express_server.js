@@ -39,7 +39,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  //Redirect user to the long url on short url click
+  //Redirect user to the long url on short url clickurlDatabase[req.params.shortURL];
   res.redirect(urlDatabase[req.params.shortURL]);
 });
 
