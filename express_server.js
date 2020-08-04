@@ -64,7 +64,12 @@ app.post("/login", (req, res) => {
   console.log(req.body);
 });
 
-
+//get logout request
+app.post("/logout", (req, res) => {
+  res.clearCookie('username')
+  res.redirect("/urls");
+  console.log(req.body);
+});
 
 app.post("/urls", (req, res) => {
   //Update DB with submitted URL
