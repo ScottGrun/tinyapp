@@ -13,8 +13,9 @@ const generateRandomString = () => {
 
 console.log(generateRandomString());
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  "9sm5xKs": "http://www.google.com",
+  "b2xVn2": "http://www.lighthouselabs.ca",
+ 
 };
 
 app.get("/", (req, res) => {
@@ -43,6 +44,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL]);
 });
 
+
 app.post("/urls", (req, res) => {
   //Update DB with submitted URL
   const shortURL = generateRandomString();
@@ -53,6 +55,18 @@ app.post("/urls", (req, res) => {
   res.send("Ok");
 });
 
+//delete url
+app.post('/urls/:shortURL/delete', (req, res)=>{
+  let shortURL = req.params.shortURL;
+  console.log(shortURL)
+  console.log(urlDatabase)
+  delete urlDatabase[shortURL];
+  res.redirect('/urls')
+
+})
+
 app.listen(PORT, () => {
   console.log(`App is live on port ${PORT}`);
 });
+
+
