@@ -41,8 +41,8 @@ const checkValueExists = (valueName, value, databaseToCheck) => {
 
 //FAKE DATABASE
 const urlDatabase = {
-  "9sm5xKs": "http://www.google.com",
-  b2xVn2: "http://www.lighthouselabs.ca",
+  "9sm5xKs": { longURL: "http://www.google.com", userId: "" },
+  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userId: "" },
 };
 
 //FAKE USER DATABASE
@@ -61,9 +61,8 @@ app.get("/urls", (req, res) => {
 
 //Display create url page endpoint
 app.get("/urls/new", (req, res) => {
-
-  if(!req.cookies.user_id){
-    res.redirect('/login');
+  if (!req.cookies.user_id) {
+    res.redirect("/login");
   }
 
   const templateVars = {
@@ -100,7 +99,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies.user_id],
   };
   res.render("urls_show", templateVars);
@@ -117,7 +116,7 @@ app.post("/editurl/:id", (req, res) => {
 
 //Redirect User to the source url
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL]);
+  res.redirect(urlDatabase[req.params.shortURL].longURL);
 });
 
 //render register user page
