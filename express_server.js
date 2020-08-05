@@ -61,6 +61,11 @@ app.get("/urls", (req, res) => {
 
 //Display create url page endpoint
 app.get("/urls/new", (req, res) => {
+
+  if(!req.cookies.user_id){
+    res.redirect('/login');
+  }
+
   const templateVars = {
     user: users[req.cookies.user_id],
   };
