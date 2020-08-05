@@ -18,42 +18,57 @@
   </head>
   <body>
     <%-include('partials/_header.ejs')%>
-    <main style="margin: 1em;">
-      <h3>My URLs</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Short URL</th>
-            <th scope="col">Long URL</th>
-            <th scope="col">Edit</th>
-            <th scope="col">Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% for(let url in urls) { %>
-          <tr>
-            <td><%= url %></td>
-            <td><%= urls[url].longURL %></td>
-            <td>
-              <form method="POST" action="/urls/<%= url %>">
-                <button type="submit" class="btn btn-outline-primary">
-                  Edit
-                </button>
-              </form>
-            </td>
-            <td>
-              <form method="POST" action="/urls/<%= url %>/delete">
-                <button type="submit" class="btn btn-outline-danger">
-                  Delete
-                </button>
-              </form>
-            </td>
-    
-          </tr>
-          <% } %>
-        </tbody>
-      </table>
-    </main>
+   
+    <% if(user){ %>
+      <main style="margin: 1em;">
+        <h3>My URLs</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Short URL</th>
+              <th scope="col">Long URL</th>
+              <th scope="col">Edit</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for(let url in urls) { %>
+            <tr>
+              <td><%= url %></td>
+              <td><%= urls[url].longURL %></td>
+              <td>
+                <form method="POST" action="/urls/<%= url %>">
+                  <button type="submit" class="btn btn-outline-primary">
+                    Edit
+                  </button>
+                </form>
+              </td>
+              <td>
+                <form method="POST" action="/urls/<%= url %>/delete">
+                  <button type="submit" class="btn btn-outline-danger">
+                    Delete
+                  </button>
+                </form>
+              </td>
+      
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </main>
+    <% } else{ %>  
+      <div class="w-50 mx-auto mt-5">
+        <h1 class="text-danger text-center">Please login to view URLS</h1>
+        <form action="/login" method="GET">
+          <button class="btn btn-primary d-block w-50 mx-auto">
+            Login
+          </button>
+        </form>
+        
+      </div>
+   <% } %>
+
+   
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
