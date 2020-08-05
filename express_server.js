@@ -60,6 +60,21 @@ app.post("/editurl/:id", (req, res) => {
   res.send("Ok");
 });
 
+
+app.post('/registeruser', (req, res)=>{
+  console.log('params', req.params)
+  console.log('body', req.body)
+  res.redirect('/register')
+
+})
+
+
+//render register user page
+app.get('/register', (req, res)=>{
+  res.render('user_register');
+})
+
+
 //get login info
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
