@@ -39,10 +39,26 @@ const checkValueExists = (valueName, value, databaseToCheck) => {
   return false;
 };
 
+//Filter DB
+const urlsForUser = (inputUserId, db) => {
+  let filteredDB = {};
+
+  for (let data in db) {
+    console.log(db[data]);
+    if (db[data].userId === inputUserId) {
+      filteredDB[data] = {
+        longURL: db[data].longURL,
+        userId: db[data].userId,
+      };
+    }
+  }
+  return filteredDB;
+};
+
 //FAKE DATABASE
 const urlDatabase = {
   "9sm5xKs": { longURL: "http://www.google.com", userId: "" },
-  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userId: "" },
+  b3xVn2: { longURL: "http://www.lighthouselabs.ca", userId: "" },
 };
 
 //FAKE USER DATABASE
@@ -55,7 +71,9 @@ app.get("/", (req, res) => {
 
 //Display URLs endpoint
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
+  const database = urlsForUser(req.cookies.user_id, urlDatabase);
+  console.log(database);
+  const templateVars = { urls: database, user: users[req.cookies.user_id] };
   res.render("urls_index", templateVars);
 });
 
@@ -74,7 +92,11 @@ app.get("/urls/new", (req, res) => {
 //Update DB with submitted URL
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  const newDataItem = {
+    longURL: req.body.longURL,
+    userId: req.cookies.user_id,
+  };
+  urlDatabase[shortURL] = newDataItem;
   const redirectLink = `/urls/${shortURL}`;
   res.redirect(redirectLink);
   console.log(urlDatabase);
@@ -88,11 +110,15 @@ app.post("/urls/:id", (req, res) => {
 
 //delete url
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let shortURL = req.params.shortURL;
-  console.log(shortURL);
-  console.log(urlDatabase);
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+  if (urlDatabase[req.params.shortURL].userId !== req.cookies.user_id) {
+    res.redirect("/urls");
+  } else {
+    let shortURL = req.params.shortURL;
+    console.log(shortURL);
+    console.log(urlDatabase);
+    delete urlDatabase[shortURL];
+    res.redirect("/urls");
+  }
 });
 
 //display the newly created url
@@ -107,11 +133,21 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //edit selected url
 app.post("/editurl/:id", (req, res) => {
-  //Update DB with submitted URL
-  let shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect("/urls");
-  res.send("Ok");
+  if (urlDatabase[req.params.id].userId !== req.cookies.user_id) {
+    res.redirect("/urls");
+  } else {
+    //Update DB with submitted URL
+    let shortURL = req.params.id;
+    const newDataItem = {
+      longURL: req.body.longURL,
+      userId: req.cookies.user_id,
+    };
+
+    urlDatabase[shortURL] = newDataItem;
+
+    res.redirect("/urls");
+    res.send("Ok");
+  }
 });
 
 //Redirect User to the source url
