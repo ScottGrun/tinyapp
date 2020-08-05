@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
-
 const app = express();
 const PORT = 8080;
 app.set("view engine", "ejs");
@@ -16,24 +15,38 @@ const generateRandomString = () => {
   return Math.random().toString(36).substr(6);
 };
 
+//Add user to DB
+const registerUser = (id, email, password) => {
+  users[id] = {
+    id,
+    email,
+    password,
+  };
+};
+
+//FAKE DATABASE
 const urlDatabase = {
   "9sm5xKs": "http://www.google.com",
   b2xVn2: "http://www.lighthouselabs.ca",
 };
 
+//FAKE USER DATABASE
+const users = {};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars ={
-    username: req.cookies["username"]
-  }
+  const templateVars = {
+    user: users[req.cookies.user_id],
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -41,7 +54,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"],
+    user: users[req.cookies.user_id],
   };
   res.render("urls_show", templateVars);
 });
@@ -60,20 +73,22 @@ app.post("/editurl/:id", (req, res) => {
   res.send("Ok");
 });
 
-
-app.post('/registeruser', (req, res)=>{
-  console.log('params', req.params)
-  console.log('body', req.body)
-  res.redirect('/register')
-
-})
-
-
 //render register user page
-app.get('/register', (req, res)=>{
-  res.render('user_register');
-})
+app.get("/register", (req, res) => {
+  res.render("user_register");
+});
 
+app.post("/registeruser", (req, res) => {
+  const userId = generateRandomString();
+
+  //Register user and add to DB
+  registerUser(userId, req.body.email, req.body.password);
+
+  //Set user cookies
+  res.cookie("user_id", userId);
+
+  res.redirect("/urls");
+});
 
 //get login info
 app.post("/login", (req, res) => {
@@ -84,7 +99,7 @@ app.post("/login", (req, res) => {
 
 //get logout request
 app.post("/logout", (req, res) => {
-  res.clearCookie('username')
+  res.clearCookie("username");
   res.redirect("/urls");
   console.log(req.body);
 });
