@@ -13,7 +13,7 @@
     </div>
 
     <% if(user){ %>
-      <h4 class="m-0 p-0">Logged In As: <b><%= user.id %></b></h4> 
+      <h4 class="m-0 p-0">Logged In As: <b><%= user.email %></b></h4> 
       <form class="form-inline" method="POST" action="/logout">
         <button type="submit" class="btn btn-outline-dark mx-4">Logout</button>
       </form>

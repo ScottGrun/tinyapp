@@ -25,15 +25,15 @@ const registerUser = (id, email, password) => {
 };
 
 //Check if emaile exists
-const checkEmailExists = (emailToCheck, databaseToCheck) => {
+const checkValueExists = (valueName, value, databaseToCheck) => {
   console.log(databaseToCheck, "  fuck");
   if (Object.keys(databaseToCheck).length === 0) {
     return false;
   }
 
   for (let user in databaseToCheck) {
-    if (databaseToCheck[user].email === emailToCheck) {
-      return true;
+    if (databaseToCheck[user][valueName] === value) {
+      return databaseToCheck[user];
     }
   }
   return false;
@@ -128,7 +128,7 @@ app.post("/register", (req, res) => {
     res.render("user_register", {
       error: "Cannot leave email or password field blank.",
     });
-  } else if (checkEmailExists(req.body.email, users) === true) {
+  } else if (checkValueExists("email", req.body.email, users)) {
     res.status(400);
     res.render("user_register", {
       error: "Email is already registered please try another.",
@@ -144,15 +144,27 @@ app.post("/register", (req, res) => {
 
 //get login info
 app.get("/login", (req, res) => {
-  res.render("user_login", {error: ""});
+  res.render("user_login", { error: "" });
 });
-
 
 //get login info
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
-  console.log(req.body);
+  if (checkValueExists("email", req.body.email, users)) {
+    if (
+      checkValueExists("email", req.body.email, users).password !==
+      req.body.password
+    ) {
+      res.render("user_login", {
+        error: "Error incorrect username or password",
+      });
+    }
+    res.cookie("user_id", checkValueExists("email", req.body.email, users).id);
+    res.redirect("/urls");
+    console.log("Yes authed");
+  }
+  res.render("user_login", { error: "Error incorrect username or password" });
+
+  console.log("Eror on login");
 });
 
 //get logout request
