@@ -53,11 +53,13 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
+//Display URLs endpoint
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
   res.render("urls_index", templateVars);
 });
 
+//Display create url page endpoint
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies.user_id],
@@ -65,6 +67,31 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+//Update DB with submitted URL
+app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL;
+  const redirectLink = `/urls/${shortURL}`;
+  res.redirect(redirectLink);
+  console.log(urlDatabase);
+  res.send("Ok");
+});
+
+//edit url
+app.post("/urls/:id", (req, res) => {
+  res.redirect(`/urls/${req.params.id}`);
+});
+
+//delete url
+app.post("/urls/:shortURL/delete", (req, res) => {
+  let shortURL = req.params.shortURL;
+  console.log(shortURL);
+  console.log(urlDatabase);
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
+//display the newly created url
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -74,18 +101,18 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  //Redirect user to the long url on short url clickurlDatabase[req.params.shortURL];
-  res.redirect(urlDatabase[req.params.shortURL]);
-});
-
-//edit url
+//edit selected url
 app.post("/editurl/:id", (req, res) => {
   //Update DB with submitted URL
   let shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect("/urls");
   res.send("Ok");
+});
+
+//Redirect User to the source url
+app.get("/u/:shortURL", (req, res) => {
+  res.redirect(urlDatabase[req.params.shortURL]);
 });
 
 //render register user page
@@ -116,6 +143,12 @@ app.post("/register", (req, res) => {
 });
 
 //get login info
+app.get("/login", (req, res) => {
+  res.render("user_login", {error: ""});
+});
+
+
+//get login info
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
@@ -124,33 +157,9 @@ app.post("/login", (req, res) => {
 
 //get logout request
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
   console.log(req.body);
-});
-
-app.post("/urls", (req, res) => {
-  //Update DB with submitted URL
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  const redirectLink = `/urls/${shortURL}`;
-  res.redirect(redirectLink);
-  console.log(urlDatabase);
-  res.send("Ok");
-});
-
-//delete url
-app.post("/urls/:shortURL/delete", (req, res) => {
-  let shortURL = req.params.shortURL;
-  console.log(shortURL);
-  console.log(urlDatabase);
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
-});
-
-//edit url
-app.post("/urls/:id", (req, res) => {
-  res.redirect(`/urls/${req.params.id}`);
 });
 
 app.listen(PORT, () => {
