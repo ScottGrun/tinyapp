@@ -15,10 +15,14 @@
     <div class="container min-vh-100 d-flex">
       <form
         class="w-50 mb-5 mx-auto align-self-center"
-        action="/registeruser"
+        action="/register"
         method="POST"
       >
         <h1 class="text-center p-4">TinyURL Registration</h1>
+
+    <% if(error){ %>
+      <p class="text-danger text-center"> <%= error %></p>
+    <% } %>
         <div class="form-group">
           <label for="exampleInputEmail1">Email address</label>
           <input

@@ -24,6 +24,21 @@ const registerUser = (id, email, password) => {
   };
 };
 
+//Check if emaile exists
+const checkEmailExists = (emailToCheck, databaseToCheck) => {
+  console.log(databaseToCheck, "  fuck");
+  if (Object.keys(databaseToCheck).length === 0) {
+    return false;
+  }
+
+  for (let user in databaseToCheck) {
+    if (databaseToCheck[user].email === emailToCheck) {
+      return true;
+    }
+  }
+  return false;
+};
+
 //FAKE DATABASE
 const urlDatabase = {
   "9sm5xKs": "http://www.google.com",
@@ -75,19 +90,29 @@ app.post("/editurl/:id", (req, res) => {
 
 //render register user page
 app.get("/register", (req, res) => {
-  res.render("user_register");
+  res.render("user_register", { error: "" });
 });
 
-app.post("/registeruser", (req, res) => {
+app.post("/register", (req, res) => {
   const userId = generateRandomString();
 
-  //Register user and add to DB
-  registerUser(userId, req.body.email, req.body.password);
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400);
+    res.render("user_register", {
+      error: "Cannot leave email or password field blank.",
+    });
+  } else if (checkEmailExists(req.body.email, users) === true) {
+    res.status(400);
+    res.render("user_register", {
+      error: "Email is already registered please try another.",
+    });
+  } else {
+    res.cookie("user_id", userId);
+    res.redirect("/urls");
 
-  //Set user cookies
-  res.cookie("user_id", userId);
-
-  res.redirect("/urls");
+    //Register user and add to DB
+    registerUser(userId, req.body.email, req.body.password);
+  }
 });
 
 //get login info
