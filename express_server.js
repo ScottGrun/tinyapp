@@ -2,11 +2,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
+const bcrypt = require("bcrypt");
 const app = express();
 const PORT = 8080;
+
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(morgan("dev"));
 app.use(cookieParser());
 
@@ -20,8 +21,9 @@ const registerUser = (id, email, password) => {
   users[id] = {
     id,
     email,
-    password,
+    password: bcrypt.hashSync(password, 10),
   };
+  console.log(users)
 };
 
 //Check if emaile exists
@@ -189,11 +191,9 @@ app.get("/login", (req, res) => {
 
 //get login info
 app.post("/login", (req, res) => {
+  const hashedPassword = checkValueExists("email", req.body.email, users).password; 
   if (checkValueExists("email", req.body.email, users)) {
-    if (
-      checkValueExists("email", req.body.email, users).password !==
-      req.body.password
-    ) {
+    if ( !bcrypt.compareSync(req.body.password, hashedPassword)) {
       res.render("user_login", {
         error: "Error incorrect username or password",
       });
