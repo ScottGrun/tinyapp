@@ -3,11 +3,11 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
-const {getUserByEmail} = require('./helper');
+const { getUserByEmail } = require("./helper");
 const app = express();
 const PORT = 8080;
 
-app.use( express.static( "./" ) );
+app.use(express.static("./"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
@@ -31,8 +31,6 @@ const registerUser = (id, email, password) => {
     password: bcrypt.hashSync(password, 10),
   };
 };
-
-
 
 //Check if emaile exists
 const checkValueExists = (valueName, value, databaseToCheck) => {
@@ -85,18 +83,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//Display create url page endpoint
-app.get("/urls/new", (req, res) => {
-  if (!req.session.user_id) {
-    res.redirect("/login");
-  }
-
-  const templateVars = {
-    user: users[req.session.user_id],
-  };
-  res.render("urls_new", templateVars);
-});
-
 //Update DB with submitted URL
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
@@ -134,7 +120,7 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.session.user_id],
   };
-  res.render("urls_show", templateVars);
+  res.redirect("/urls");
 });
 
 //edit selected url
@@ -163,7 +149,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //render register user page
 app.get("/register", (req, res) => {
-  res.render("user_register", { error: "" });
+  res.render("user_register", { error: "", user: users[req.session.user_id] });
 });
 
 app.post("/register", (req, res) => {
@@ -174,6 +160,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.render("user_register", {
       error: "Cannot leave email or password field blank.",
+      user: users[req.session.user_id]
     });
 
     //Reject register if user exists
@@ -181,6 +168,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.render("user_register", {
       error: "Email is already registered please try another.",
+      user: users[req.session.user_id]
     });
   } else {
     req.session.user_id = userId;
@@ -191,7 +179,7 @@ app.post("/register", (req, res) => {
 
 //get login info
 app.get("/login", (req, res) => {
-  res.render("user_login", { error: "" });
+  res.render("user_login", { error: "", user: users[req.session.user_id] });
 });
 
 //get login info

@@ -24,6 +24,14 @@ body{
   height: 40px;
 }
 
+table{
+  margin: 0 auto;
+  border: 1px solid red;
+  position:absolute;
+  top: 150px;
+  overflow:auto
+}
+
 
 .btn-primary{
   color: white;
@@ -68,8 +76,8 @@ body{
 }
 
 #url-input-container {
-
-  align-self: center;
+  position: sticky;
+  margin-top: 25%;
   grid-column: 4 / span 6;
   width: 100%;
 }
