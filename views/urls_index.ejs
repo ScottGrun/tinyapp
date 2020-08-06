@@ -14,61 +14,113 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+
+    <link rel="stylesheet" href="../style.css" />
     <title>TinyApp</title>
   </head>
   <body>
-    <%-include('partials/_header.ejs')%>
-   
-    <% if(user){ %>
-      <main style="margin: 1em;">
-        <h3>My URLs</h3>
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">Short URL</th>
-              <th scope="col">Long URL</th>
-              <th scope="col">Edit</th>
-              <th scope="col">Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% for(let url in urls) { %>
-            <tr>
-              <td><%= url %></td>
-              <td><%= urls[url].longURL %></td>
-              <td>
-                <form method="POST" action="/urls/<%= url %>">
-                  <button type="submit" class="btn btn-outline-primary">
-                    Edit
-                  </button>
-                </form>
-              </td>
-              <td>
-                <form method="POST" action="/urls/<%= url %>/delete">
-                  <button type="submit" class="btn btn-outline-danger">
-                    Delete
-                  </button>
-                </form>
-              </td>
-      
-            </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </main>
-    <% } else{ %>  
-      <div class="w-50 mx-auto mt-5">
-        <h1 class="text-danger text-center">Please login to view URLS</h1>
-        <form action="/login" method="GET">
-          <button class="btn btn-primary d-block w-50 mx-auto">
-            Login
-          </button>
-        </form>
-        
-      </div>
-   <% } %>
+    <%- include('partials/_header') %>
 
-   
+    <% if(user){ %> 
+    <div class="wrapper">
+      <div class="grid vh-100">
+
+
+<!-- Modal -->
+<div class="modal fade " id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Changing Destination URL for TinyURL: <b><span id="shortURL"></span></b></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <form class="form-inline w-auto mx-auto justify-content-center p-3" action="" method="POST" id="modalForm">
+          <div class="form-group w-90">
+            <label class="d-block w-50" for="longURL">New Destination URL:</label>
+            <input class="form-control mr-2 w-75" type="text" name="longURL" placeholder="http://" >
+            <button type="submit" class="btn btn-primary">Submit Changes</button>
+          </div>
+        </form>
+
+      </div>
+    
+    </div>
+  </div>
+</div>
+
+        <div id="url-input-container">
+          <div id="main-page-header">
+            <h1 class="header-1">Tiny URL</h1>
+            <p>Enter a URL of your choosing and convert it a shorter one !</p>
+          </div>
+          <form id="main-page-form" action="/urls" method="POST">
+            <div id="main-page-input">
+              <label for="longURL">URL to Shorten</label>
+              <input
+                type="text"
+                name="longURL"
+                placeholder="https://"
+                class="form-control"
+              />
+            </div>
+            <button type="submit" id="main-page-btn" class="btn-primary">
+              Shorten URL
+            </button>
+          </form>
+          <!--Urls Table-->
+          <table class="table mt-5">
+            <thead >
+              <tr class=" table-borderless">
+                <th scope="col">Short URL</th>
+                <th scope="col">Long URL</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for(let url in urls) { %>
+              <tr>
+                <td> <a href="<%= urls[url].longURL %>"><%= url %> </a></td>
+                <td>  <a href="<%= urls[url].longURL %>"><%= urls[url].longURL %> </a></td>
+                <td>
+                  <form method="POST" action="/urls/<%= url %>">
+                    <button onclick="editURL(this)" data-toggle="modal" data-target="#exampleModal" type="button" data-shortURL="<%= url %>" data-longURL="<%= urls[url].longURL %>" class="btn btn-outline-dark">
+                      Edit
+                    </button>
+                  </form>
+                </td>
+                <td>
+                  <form method="POST" action="/urls/<%= url %>/delete">
+                    <button type="submit" class="btn btn-outline-danger">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <% } else{ %>
+
+      <div class="container">
+        <div class="row min-vh-100 align-content-center">
+    <div class="w-50 mx-auto mb-5">
+      <img class="mx-auto d-block" src="/img/lock.svg" />
+      <h1 class="p-5 text-center font-weight-bold">Login to View URLS</h1>
+      <form action="/login" method="GET">
+        <button class="btn btn-primary d-block w-50 mx-auto">
+          Login
+        </button>
+      </form>
+    </div>
+    <% } %>
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -80,10 +132,10 @@
       integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
       crossorigin="anonymous"
     ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-      crossorigin="anonymous"
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+  crossorigin="anonymous"
     ></script>
+    <script src="../editUrl.js"></script>
   </body>
+
 </html>

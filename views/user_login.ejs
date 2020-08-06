@@ -15,17 +15,17 @@
 
     <div class="container min-vh-100 d-flex">
       <form
-        class="w-50 mb-5 mx-auto align-self-center"
+        class="w-50 mb-5 mx-auto align-self-center border p-5 rounded"
         action="/login"
         method="POST"
       >
-        <h1 class="text-center p-4">User Login</h1>
+        <h1 class="text-center font-weight-bold p-4">User Login</h1>
 
     <% if(error){ %>
       <p class="text-danger text-center"> <%= error %></p>
     <% } %>
         <div class="form-group">
-          <label for="exampleInputEmail1">Email address</label>
+          <label class="" for="exampleInputEmail1">Email address</label>
           <input
             name="email"
             type="email"
@@ -48,7 +48,7 @@
         </div>
         <button
           type="submit"
-          class="btn btn-primary text-center d-block w-75 mx-auto"
+          class="btn btn-primary text-center d-block w-100 mx-auto p-2"
         >
           Login
         </button>

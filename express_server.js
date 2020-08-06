@@ -3,10 +3,11 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
-const getUserByEmail = require('./helper');
+const {getUserByEmail} = require('./helper');
 const app = express();
 const PORT = 8080;
 
+app.use( express.static( "./" ) );
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
