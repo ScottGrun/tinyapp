@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
+const getUserByEmail = require('./helper');
 const app = express();
 const PORT = 8080;
 
@@ -28,8 +29,9 @@ const registerUser = (id, email, password) => {
     email,
     password: bcrypt.hashSync(password, 10),
   };
-  console.log(`Logging Registered User: ${users}`);
 };
+
+
 
 //Check if emaile exists
 const checkValueExists = (valueName, value, databaseToCheck) => {
@@ -166,12 +168,15 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const userId = generateRandomString();
 
+  //Reject register if any field is empty
   if (req.body.email === "" || req.body.password === "") {
     res.status(400);
     res.render("user_register", {
       error: "Cannot leave email or password field blank.",
     });
-  } else if (checkValueExists("email", req.body.email, users)) {
+
+    //Reject register if user exists
+  } else if (getUserByEmail(req.body.email, users).email) {
     res.status(400);
     res.render("user_register", {
       error: "Email is already registered please try another.",
@@ -179,8 +184,6 @@ app.post("/register", (req, res) => {
   } else {
     req.session.user_id = userId;
     res.redirect("/urls");
-
-    //Register user and add to DB
     registerUser(userId, req.body.email, req.body.password);
   }
 });
@@ -192,22 +195,18 @@ app.get("/login", (req, res) => {
 
 //get login info
 app.post("/login", (req, res) => {
-  const hashedPassword = checkValueExists("email", req.body.email, users)
-    .password;
-  if (checkValueExists("email", req.body.email, users)) {
-    if (!bcrypt.compareSync(req.body.password, hashedPassword)) {
-      res.render("user_login", {
-        error: "Error incorrect username or password",
-      });
-    }
+  const possibleUser = getUserByEmail(req.body.email, users);
+  if (
+    possibleUser.email &&
+    bcrypt.compareSync(req.body.password, possibleUser.password)
+  ) {
     req.session.user_id = checkValueExists("email", req.body.email, users).id;
-    //res.cookie("user_id", checkValueExists("email", req.body.email, users).id);
     res.redirect("/urls");
     console.log("Yes authed");
+  } else {
+    res.render("user_login", { error: "Error incorrect username or password" });
+    console.log("Eror on login");
   }
-  res.render("user_login", { error: "Error incorrect username or password" });
-
-  console.log("Eror on login");
 });
 
 //get logout request
