@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
-const { getUserByEmail } = require("./helper");
+const { getUserByEmail, generateRandomString } = require("./helper");
 const app = express();
 const PORT = 8080;
 
@@ -18,12 +18,6 @@ app.use(
   })
 );
 
-//Generate Random URL string
-const generateRandomString = () => {
-  return Math.random().toString(36).substr(6);
-};
-
-//Add user to DB
 const registerUser = (id, email, password) => {
   users[id] = {
     id,
@@ -31,6 +25,9 @@ const registerUser = (id, email, password) => {
     password: bcrypt.hashSync(password, 10),
   };
 };
+
+
+
 
 //Check if emaile exists
 const checkValueExists = (valueName, value, databaseToCheck) => {
@@ -171,7 +168,8 @@ app.post("/register", (req, res) => {
   } else {
     req.session.user_id = userId;
     res.redirect("/urls");
-    registerUser(userId, req.body.email, req.body.password);
+  registerUser(userId, req.body.email, req.body.password);
+    console.log(users)
   }
 });
 
