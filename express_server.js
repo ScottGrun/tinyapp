@@ -3,7 +3,12 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
-const {getUserByEmail} = require('./helper');
+const {
+  getUserByEmail,
+  generateRandomString,
+  registerUser,
+  urlsForUser,
+} = require("./helper");
 const app = express();
 const PORT = 8080;
 
@@ -16,36 +21,6 @@ app.use(
     keys: ["lighthouse", "labs"],
   })
 );
-
-//Generate Random URL string
-const generateRandomString = () => {
-  return Math.random().toString(36).substr(6);
-};
-
-//Add user to DB
-const registerUser = (id, email, password) => {
-  users[id] = {
-    id,
-    email,
-    password: bcrypt.hashSync(password, 10),
-  };
-};
-
-//Filter DB
-const urlsForUser = (inputUserId, db) => {
-  let filteredDB = {};
-
-  for (let data in db) {
-    console.log(db[data]);
-    if (db[data].userId === inputUserId) {
-      filteredDB[data] = {
-        longURL: db[data].longURL,
-        userId: db[data].userId,
-      };
-    }
-  }
-  return filteredDB;
-};
 
 //FAKE DATABASE
 const urlDatabase = {
@@ -156,18 +131,20 @@ app.post("/register", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
     res.status(400);
     res.render("user_register", {
-      error: "Cannot leave email or password field blank.", user: users[req.session.user_id]
+      error: "Cannot leave email or password field blank.",
+      user: users[req.session.user_id],
     });
     //Reject register if user exists
   } else if (getUserByEmail(req.body.email, users).email) {
     res.status(400);
     res.render("user_register", {
-      error: "Email is already registered please try another.", user: users[req.session.user_id]
+      error: "Email is already registered please try another.",
+      user: users[req.session.user_id],
     });
   } else {
     req.session.user_id = userId;
+    users[userId] = registerUser(userId, req.body.email, req.body.password);
     res.redirect("/urls");
-    registerUser(userId, req.body.email, req.body.password);
   }
 });
 
@@ -187,7 +164,10 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
     console.log("Yes authed");
   } else {
-    res.render("user_login", { error: "Error incorrect username or password", user: users[req.session.user_id] });
+    res.render("user_login", {
+      error: "Error incorrect username or password",
+      user: users[req.session.user_id],
+    });
     console.log("Eror on login");
   }
 });
