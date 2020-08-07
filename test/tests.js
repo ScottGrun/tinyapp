@@ -36,11 +36,7 @@ describe('getUserByEmail', function() {
 
   it('should return undefined if no matching email is found', function() {
     const user = getUserByEmail("user@example.cosm", testUsers)
-    const expectedOutput = {
-      id: "userRandomID", 
-      email: "user@example.com", 
-      password: "purple-monkey-dinosaur"
-    };
+
     expect(user).to.eql(undefined);
   });
 });

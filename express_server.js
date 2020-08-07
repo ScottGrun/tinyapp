@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
-const getUserByEmail = require('./helper');
+const {getUserByEmail} = require('./helper');
 const app = express();
 const PORT = 8080;
 
@@ -29,22 +29,6 @@ const registerUser = (id, email, password) => {
     email,
     password: bcrypt.hashSync(password, 10),
   };
-};
-
-
-
-//Check if emaile exists
-const checkValueExists = (valueName, value, databaseToCheck) => {
-  if (Object.keys(databaseToCheck).length === 0) {
-    return false;
-  }
-
-  for (let user in databaseToCheck) {
-    if (databaseToCheck[user][valueName] === value) {
-      return databaseToCheck[user];
-    }
-  }
-  return false;
 };
 
 //Filter DB
@@ -162,7 +146,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //render register user page
 app.get("/register", (req, res) => {
-  res.render("user_register", { error: "" });
+  res.render("user_register", { error: "", user: users[req.session.user_id] });
 });
 
 app.post("/register", (req, res) => {
@@ -172,14 +156,13 @@ app.post("/register", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
     res.status(400);
     res.render("user_register", {
-      error: "Cannot leave email or password field blank.",
+      error: "Cannot leave email or password field blank.", user: users[req.session.user_id]
     });
-
     //Reject register if user exists
   } else if (getUserByEmail(req.body.email, users).email) {
     res.status(400);
     res.render("user_register", {
-      error: "Email is already registered please try another.",
+      error: "Email is already registered please try another.", user: users[req.session.user_id]
     });
   } else {
     req.session.user_id = userId;
@@ -190,7 +173,7 @@ app.post("/register", (req, res) => {
 
 //get login info
 app.get("/login", (req, res) => {
-  res.render("user_login", { error: "" });
+  res.render("user_login", { error: "", user: users[req.session.user_id] });
 });
 
 //get login info
@@ -200,11 +183,11 @@ app.post("/login", (req, res) => {
     possibleUser.email &&
     bcrypt.compareSync(req.body.password, possibleUser.password)
   ) {
-    req.session.user_id = checkValueExists("email", req.body.email, users).id;
+    req.session.user_id = getUserByEmail(req.body.email, users).id;
     res.redirect("/urls");
     console.log("Yes authed");
   } else {
-    res.render("user_login", { error: "Error incorrect username or password" });
+    res.render("user_login", { error: "Error incorrect username or password", user: users[req.session.user_id] });
     console.log("Eror on login");
   }
 });
