@@ -41,4 +41,9 @@ const urlsForUser = (inputUserId, db) => {
   return filteredDB;
 };
 
-module.exports = { getUserByEmail, generateRandomString, registerUser, urlsForUser };
+//Check user match
+const checkUserIdentity =(actual, expected)=>{
+  return actual === expected;
+}
+
+module.exports = { getUserByEmail, generateRandomString, registerUser, urlsForUser, checkUserIdentity };

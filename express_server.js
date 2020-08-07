@@ -1,14 +1,19 @@
+//Import required packages
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
+
+//Importing helper functions
 const {
   getUserByEmail,
   generateRandomString,
   registerUser,
   urlsForUser,
+  checkUserIdentity,
 } = require("./helper");
+
 const app = express();
 const PORT = 8080;
 
@@ -23,10 +28,7 @@ app.use(
 );
 
 //FAKE DATABASE
-const urlDatabase = {
-  "9sm5xKs": { longURL: "http://www.google.com", userId: "" },
-  b3xVn2: { longURL: "http://www.lighthouselabs.ca", userId: "" },
-};
+const urlDatabase = {};
 
 //FAKE USER DATABASE
 const users = {};
@@ -45,14 +47,11 @@ app.get("/urls", (req, res) => {
 
 //Display create url page endpoint
 app.get("/urls/new", (req, res) => {
+  //Redirect to login if user not logged in
   if (!req.session.user_id) {
     res.redirect("/login");
   }
-
-  const templateVars = {
-    user: users[req.session.user_id],
-  };
-  res.render("urls_new", templateVars);
+  res.render("urls_new", { user: users[req.session.user_id] });
 });
 
 //Update DB with submitted URL
@@ -63,59 +62,72 @@ app.post("/urls", (req, res) => {
     userId: req.session.user_id,
   };
   urlDatabase[shortURL] = newDataItem;
-  const redirectLink = `/urls/${shortURL}`;
-  res.redirect(redirectLink);
-  res.send("Ok");
+  res.redirect(`/urls/${shortURL}`);
 });
 
-//edit url
+//Redirect to edit url page
 app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls/${req.params.id}`);
 });
 
-//delete url
+//Delete selected url
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (urlDatabase[req.params.shortURL].userId !== req.session.user_id) {
+  if (
+    checkUserIdentity(
+      urlDatabase[req.params.shortURL].userId,
+      req.session.user_id
+    )
+  ) {
+    delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
   } else {
-    let shortURL = req.params.shortURL;
-
-    delete urlDatabase[shortURL];
     res.redirect("/urls");
   }
 });
 
 //display the newly created url
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
-    user: users[req.session.user_id],
-  };
-  res.render("urls_show", templateVars);
+
+  if (!urlDatabase[req.params.shortURL]) {
+    res.send('Sorry resource not found');
+  } else if (checkUserIdentity(
+    urlDatabase[req.params.shortURL].userId,
+    req.session.user_id
+  )) {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user: users[req.session.user_id],
+    };
+    res.render("urls_show", templateVars);
+  } else {
+    res.send('Sorry only authorized users can access this page.');
+  }
+
+ 
 });
 
 //edit selected url
 app.post("/editurl/:id", (req, res) => {
-  if (urlDatabase[req.params.id].userId !== req.session.user_id) {
-    res.redirect("/urls");
-  } else {
+  if (
+    checkUserIdentity(urlDatabase[req.params.id].userId, req.session.user_id)
+  ) {
     //Update DB with submitted URL
-    let shortURL = req.params.id;
-    const newDataItem = {
-      longURL: req.body.longURL,
+    urlDatabase[req.params.id] = {
+      longURL: req.body[longURL],
       userId: req.session.user_id,
     };
-
-    urlDatabase[shortURL] = newDataItem;
-
     res.redirect("/urls");
-    res.send("Ok");
+  } else {
+    res.redirect("/urls");
   }
 });
 
 //Redirect User to the source url
 app.get("/u/:shortURL", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    res.send('Sorry resource not found');
+  }
   res.redirect(urlDatabase[req.params.shortURL].longURL);
 });
 
@@ -162,13 +174,11 @@ app.post("/login", (req, res) => {
   ) {
     req.session.user_id = getUserByEmail(req.body.email, users).id;
     res.redirect("/urls");
-    console.log("Yes authed");
   } else {
     res.render("user_login", {
       error: "Error incorrect username or password",
       user: users[req.session.user_id],
     });
-    console.log("Eror on login");
   }
 });
 
