@@ -51,7 +51,6 @@ const urlsForUser = (inputUserId, db) => {
   let filteredDB = {};
 
   for (let data in db) {
-    console.log(db[data]);
     if (db[data].userId === inputUserId) {
       filteredDB[data] = {
         longURL: db[data].longURL,
@@ -72,7 +71,6 @@ const urlDatabase = {
 const users = {};
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
   res.redirect("/urls");
 });
 
@@ -160,7 +158,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.render("user_register", {
       error: "Cannot leave email or password field blank.",
-      user: users[req.session.user_id]
+      user: users[req.session.user_id],
     });
 
     //Reject register if user exists
@@ -168,7 +166,7 @@ app.post("/register", (req, res) => {
     res.status(400);
     res.render("user_register", {
       error: "Email is already registered please try another.",
-      user: users[req.session.user_id]
+      user: users[req.session.user_id],
     });
   } else {
     req.session.user_id = userId;
@@ -191,10 +189,11 @@ app.post("/login", (req, res) => {
   ) {
     req.session.user_id = checkValueExists("email", req.body.email, users).id;
     res.redirect("/urls");
-    console.log("Yes authed");
   } else {
-    res.render("user_login", { error: "Error incorrect username or password" });
-    console.log("Eror on login");
+    res.render("user_login", {
+      error: "Error incorrect username or password",
+      user: users[req.session.user_id],
+    });
   }
 });
 
@@ -202,7 +201,6 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
   res.redirect("/urls");
-  console.log(req.body);
 });
 
 app.listen(PORT, () => {

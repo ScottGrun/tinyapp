@@ -1,9 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap");
 
-body{
-  font-family: 'Inter';
+body {
+  font-family: "Inter";
 }
-
 
 .grid {
   display: grid;
@@ -19,55 +18,53 @@ body{
   color: #0f0e17;
 }
 
-.text-input{
+.text-input {
   width: 100%;
   height: 40px;
 }
 
-table{
+table {
   margin: 0 auto;
-  border: 1px solid red;
-  position:absolute;
+  position: absolute;
   top: 150px;
-  overflow:auto
+  overflow: auto;
 }
 
-
-.btn-primary{
+.btn-primary {
   color: white;
   align-self: end;
   height: 40px;
-  background: #2B44FF;
+  background: #2b44ff;
   border-radius: 3px;
   border: none;
   font-weight: bold;
   font-size: 16px;
 }
 
-.btn-primary:hover{
+.btn-primary:hover {
   cursor: pointer;
 }
 
-#main-page-header{
+#main-page-header {
   grid-column: span 6;
   text-align: center;
 }
 
-#main-page-input{
+#main-page-input {
   grid-column: span 4;
 }
 
-#main-page-btn{
+#main-page-btn {
   grid-column: 5 / span 2;
 }
 
-#main-page-form{
+#main-page-form {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 24px;
 }
 
-.w-90{
+.w-90 {
   width: 90%;
 }
 
