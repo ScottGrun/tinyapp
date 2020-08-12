@@ -87,13 +87,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //display the newly created url
 app.get("/urls/:shortURL", (req, res) => {
-
   if (!urlDatabase[req.params.shortURL]) {
-    res.send('Sorry resource not found');
-  } else if (checkUserIdentity(
-    urlDatabase[req.params.shortURL].userId,
-    req.session.user_id
-  )) {
+    res.send("Sorry resource not found");
+  } else if (
+    checkUserIdentity(
+      urlDatabase[req.params.shortURL].userId,
+      req.session.user_id
+    )
+  ) {
     let templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL].longURL,
@@ -101,10 +102,8 @@ app.get("/urls/:shortURL", (req, res) => {
     };
     res.render("urls_show", templateVars);
   } else {
-    res.send('Sorry only authorized users can access this page.');
+    res.send("Sorry only authorized users can access this page.");
   }
-
- 
 });
 
 //edit selected url
@@ -113,10 +112,12 @@ app.post("/editurl/:id", (req, res) => {
     checkUserIdentity(urlDatabase[req.params.id].userId, req.session.user_id)
   ) {
     //Update DB with submitted URL
-    urlDatabase[req.params.id] = {
-      longURL: req.body[longURL],
+    let shortURL = req.params.id;
+    const newDataItem = {
+      longURL: req.body.longURL,
       userId: req.session.user_id,
     };
+    urlDatabase[shortURL] = newDataItem;
     res.redirect("/urls");
   } else {
     res.redirect("/urls");
@@ -126,7 +127,7 @@ app.post("/editurl/:id", (req, res) => {
 //Redirect User to the source url
 app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.send('Sorry resource not found');
+    res.send("Sorry resource not found");
   }
   res.redirect(urlDatabase[req.params.shortURL].longURL);
 });
